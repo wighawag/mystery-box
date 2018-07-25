@@ -77,7 +77,7 @@ function mint(){
   web3.eth.getAccounts().then(account => {
     
     var ItemContract = contractList[1]    
-    var promiEvent = ItemContract.methods.mint('ipfs hash id').send({from: account[0], gas: 400000})
+    var promiEvent = ItemContract.methods.mint('random1').send({from: account[0], gas: 400000})
     promiEvent.on("transactionHash", function(txHash){
       console.log(`txHash: ${txHash}`)
     });

@@ -35,24 +35,37 @@ contract MysteryBoxSale is Pausable, ERC721Holder {
         uint256 _price,
         uint256 _revealBlock
     )
-        external
+    external
+    {   
+        createMysteryBoxWithSeller(_nftContract, _tokenIds, _price, _revealBlock, msg.sender);
+    }
+
+    function createMysteryBoxWithSeller(
+        ERC721 _nftContract, //TODO array
+        uint256[] _tokenIds,
+        uint256 _price,
+        uint256 _revealBlock,
+        address seller
+    )
+        public
     {        
         require(_price == uint256(uint128(_price)), "price too high");
         require(_revealBlock == uint256(uint128(_revealBlock)), "block too high");
         
         require(_revealBlock > block.number /*+ 255*/, "Duration too short");
-        
+
         for(uint8 i=0; i < _tokenIds.length; i++){
             address ownerOfToken = _nftContract.ownerOf(_tokenIds[i]);
+            require(ownerOfToken == seller, "only the owner can be seller");
             require(msg.sender == ownerOfToken || msg.sender == address(_nftContract), "Sender is the NFT owner or the nft contract itself"); 
-            _escrow(msg.sender, _nftContract, _tokenIds[i]);
+            _escrow(ownerOfToken, _nftContract, _tokenIds[i]);
         }
 
         uint256 mysteryBoxId = ++lastMysteryBoxId;
         mysteryBoxes[mysteryBoxId] = MysteryBox(
             _nftContract,
             _tokenIds, 
-            msg.sender,
+            seller,
             uint128(_price), 
             uint64(_revealBlock), new address[](0), 0);
 

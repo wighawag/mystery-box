@@ -5,6 +5,7 @@
 		"it": false,
 		"artifacts": false,
 		"beforeEach": false,
-		"before": false
+		"before": false,
+		"describe": false
 	}
 }

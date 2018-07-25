@@ -14639,3 +14639,8 @@ section {
 .vue-lists ul, .vue-lists ol {
     padding-left: 30px;
 }
+.radio {
+    float: left;
+    padding-right: 60px;
+
+}

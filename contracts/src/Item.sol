@@ -24,6 +24,16 @@ contract Item is ERC721Token {
         _mysteryBoxSale.createMysteryBoxWithSeller(this, _tokenIds, _price, _revealBlock, msg.sender);
     }
 
+    function approveAndCreateMysteryBoxUsingBlockDelta(
+        MysteryBoxSale _mysteryBoxSale,
+        uint256[] _tokenIds,
+        uint256 _price,
+        uint256 _revealBlockDelta
+    ) public payable{
+        setApprovalForAll(_mysteryBoxSale, true);
+        _mysteryBoxSale.createMysteryBoxWithSeller(this, _tokenIds, _price, block.number + _revealBlockDelta, msg.sender);
+    }
+
     function mint(string _uri) 
         public 
         payable

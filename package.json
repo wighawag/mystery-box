@@ -1,0 +1,13 @@
+{
+  "name": "mysterybox_frontend",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "serve": "lite-server"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "lite-server": "^2.3.0"
+  }
+}

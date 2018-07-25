@@ -1,0 +1,5 @@
+{
+  "server": {
+    "baseDir": ["./static", "./contracts/build/contracts"]
+  }
+}

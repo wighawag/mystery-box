@@ -17,6 +17,8 @@ contract MysteryBoxSale is Pausable, ERC721Holder {
         address seller;
         uint128 price;
         uint64 revealBlock;
+        address[] participants;
+        bytes32 revealHash;
     }
 
     mapping (uint256 => MysteryBox) private mysteryBoxes;
@@ -26,12 +28,6 @@ contract MysteryBoxSale is Pausable, ERC721Holder {
     // event AuctionCreated(uint256 tokenId, uint256 startingPrice, uint256 endingPrice, uint256 duration);
     // event AuctionSuccessful(uint256 tokenId, uint256 totalPrice, address winner);
     // event AuctionCancelled(uint256 tokenId);
-
-    function withdraw(uint256 mysteryBoxId) 
-        external 
-    {
-        //TODO
-    }
     
     function createMysteryBox(
         ERC721 _nftContract, //TODO array
@@ -56,7 +52,7 @@ contract MysteryBoxSale is Pausable, ERC721Holder {
             _tokenIds, 
             msg.sender,
             uint128(_price), 
-            uint64(_revealBlock));
+            uint64(_revealBlock), new address[](0), 0);
 
         _addMysteryBox(mysteryBoxId);
 
@@ -70,18 +66,57 @@ contract MysteryBoxSale is Pausable, ERC721Holder {
         require(_isMysteryBoxOnSale(_mysteryBoxId), "MysteryBox not on sale");
 
         require(msg.value >= mysteryBoxes[_mysteryBoxId].price, "Not enough money for the bid");
+
+        require(mysteryBoxes[_mysteryBoxId].participants.length < mysteryBoxes[_mysteryBoxId].tokenIds.length, "mystery box has been all purchased");
+
+        mysteryBoxes[_mysteryBoxId].participants.push(msg.sender);
     }
 
     //TODO withdraw money for seller
 
+    function reveal(uint256 _mysteryBoxId)
+        external 
+    {
+        MysteryBox storage mysteryBox = mysteryBoxes[_mysteryBoxId];
+        require(block.number > mysteryBox.revealBlock, "mystery box has not finished");
+        require(block.number < mysteryBox.revealBlock + 255, "mystery box has expired"); // support looping over modulo 255
+        mysteryBox.revealHash = blockhash(mysteryBox.revealBlock);
+    }
 
-    function _addMysteryBox(uint256 _mysteryBoxId) {
+    function withdrawToSeller(uint256 _mysteryBoxId) 
+        external 
+    {
+        MysteryBox memory mysteryBox = mysteryBoxes[_mysteryBoxId];
+        require(mysteryBox.revealHash != 0, "mystery box has not been revealed");
+        
+        uint256 firstTokenIndex = (uint256(mysteryBox.revealHash) + mysteryBox.participants.length) % mysteryBox.tokenIds.length;
+        for(uint8 i = 0; i < mysteryBox.tokenIds.length - mysteryBox.participants.length; i++) { //TODO break loop (gaslimit issue)
+            uint256 tokenIndex = (firstTokenIndex + i) % mysteryBox.tokenIds.length;
+            mysteryBox.nftContract.transferFrom(this, mysteryBox.seller, mysteryBox.tokenIds[tokenIndex]);
+        }
+        mysteryBox.seller.transfer(mysteryBox.participants.length * mysteryBox.price);
+
+        //TODO closing
+    }
+
+    function withdraw(uint256 _mysteryBoxId, uint256 _participantIndex) 
+        external 
+    {
+        MysteryBox memory mysteryBox = mysteryBoxes[_mysteryBoxId];
+        require(mysteryBox.revealHash != 0, "mystery box has not been revealed");
+        require(_participantIndex < mysteryBox.participants.length, "particpantIndex to big");
+        
+        uint256 tokenIndex = (uint256(mysteryBox.revealHash) + _participantIndex) % mysteryBox.tokenIds.length;
+        mysteryBox.nftContract.transferFrom(this, mysteryBox.participants[_participantIndex], mysteryBox.tokenIds[tokenIndex]);
+    }
+
+    function _addMysteryBox(uint256 _mysteryBoxId) internal{
         uint256 length = mysteryBoxesList.length;
         mysteryBoxesList.push(_mysteryBoxId);
         mysteryBoxesListIndex[_mysteryBoxId] = length;
     }
 
-    function _removeMysteryBox(uint256 _mysteryBoxId) {
+    function _removeMysteryBox(uint256 _mysteryBoxId) internal{
         require(mysteryBoxesList.length > 0, "no mystery box exists");
         uint256 index = mysteryBoxesListIndex[_mysteryBoxId];
         uint256 lastIndex = mysteryBoxesList.length - 1;

@@ -102,7 +102,7 @@ module.exports = {
   mine: (num = 1) => {
     function mineOnce() {
       return new Promise((resolve, reject) => {
-        console.log('mining...');
+        // console.log('mining...');
         web3.currentProvider.sendAsync({
           method: 'evm_mine',
           params: [],

@@ -1,6 +1,8 @@
 const fs = require('fs');
 const Item = artifacts.require('Item');
 const MysteryBoxSale = artifacts.require('MysteryBoxSale');
+const MultiNFTAsset = artifacts.require('MultiNFTAsset');
+const ERC1155MysteryBoxSale = artifacts.require('ERC1155MysteryBoxSale');
 
 const sharedNetworks = {
   "1": true,
@@ -13,6 +15,8 @@ module.exports = function(deployer, network) {
   const deployAndSave = createDeployer(deployer, network);
   deployAndSave(Item)
     .then((deployedAssetContract) => deployAndSave(MysteryBoxSale)) //, deployedAssetContract.address))
+    .then(() => deployAndSave(MultiNFTAsset))
+    .then(() => deployAndSave(ERC1155MysteryBoxSale))
     .catch(console.error);
 };
 

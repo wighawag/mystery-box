@@ -21,7 +21,7 @@ contract Item is ERC721Token {
         uint256 _revealBlock
     ) public payable{
         setApprovalForAll(_mysteryBoxSale, true);
-        _mysteryBoxSale.createMysteryBox(this, _tokenIds, _price, _revealBlock);
+        _mysteryBoxSale.createMysteryBoxWithSeller(this, _tokenIds, _price, _revealBlock, msg.sender);
     }
 
     function mint(string _uri) 

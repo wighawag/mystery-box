@@ -99,22 +99,30 @@ module.exports = {
     });
   },
 
-  mine: () => {
-    return new Promise((resolve, reject) => {
-      console.log('mining...');
-      web3.currentProvider.sendAsync({
-        method: 'evm_mine',
-        params: [],
-        jsonrpc: '2.0',
-        id: '2'
-      }, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
+  mine: (num = 1) => {
+    function mineOnce() {
+      return new Promise((resolve, reject) => {
+        console.log('mining...');
+        web3.currentProvider.sendAsync({
+          method: 'evm_mine',
+          params: [],
+          jsonrpc: '2.0',
+          id: '2'
+        }, (err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
       });
-    });
+    }
+
+    const promises = [];
+    for (let i = 0; i < num; i++) {
+      promises.push(mineOnce());
+    }
+    return Promise.all(promises);
   },
 
   stopAutoMine: () => {
@@ -127,6 +135,24 @@ module.exports = {
       }, (err, result) => {
         if (err) {
           console.log('error while calling miner_stop', err);
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  },
+
+  startAutoMine: () => {
+    return new Promise((resolve, reject) => {
+      web3.currentProvider.sendAsync({
+        method: 'miner_start',
+        params: [],
+        jsonrpc: '2.0',
+        id: '3'
+      }, (err, result) => {
+        if (err) {
+          console.log('error while calling miner_start', err);
           reject(err);
         } else {
           resolve(result);

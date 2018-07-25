@@ -40,9 +40,11 @@ Creativity
 
 NFT token will be widely spread and we believe that user created content or digital assets should have more than 1 way of transaction, we created a fully decentralised way that will maximise the fun element to do so. We know that this is an inredibly popular method already in existing digital and physical world. On top of that, we found that this use case truly requires the blockchain as mystery box players should have visibility and assurance on the true randomness of the outcome.
 
+Time base mystery: set it be around Christmas day
+
 Game Quality
 
-This is a general concept 
+This is a general concept and will be widely spread
 
 NFT Inteoperability
 

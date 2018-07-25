@@ -62,6 +62,7 @@ whenDocumentReady(function() {
       console.log("contract initialised 2", contract[1]._address)
       localStorage.setItem('MysteryBoxAddress', contract[0]._address )
       localStorage.setItem('ItemAddress', contract[1]._address )
+      getBalance()
   })
     .catch(function(error){console.error(error);})
 });
@@ -86,6 +87,19 @@ function mint(){
     });
   });
 
+}
 
-
+function getBalance(){
+  web3.eth.getAccounts().then(account => {
+    var ItemContract = contractList[1]    
+    ItemContract.methods.balanceOf(account[0]).call().then(numberOfTokens => {
+      console.log(`results: ${JSON.stringify(numberOfTokens)}`)
+      var tokenList = Array.apply(null, {length: numberOfTokens}).map(Number.call, Number)
+      tokenList.forEach(i => {
+        ItemContract.methods.tokenDataOfOwnerByIndex(account[0], i).call().then(re =>{
+          console.log(`re: ${JSON.stringify(re)}`)
+        })
+      })
+    })
+  })
 }

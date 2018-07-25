@@ -43,6 +43,8 @@ contract MysteryBoxSale is Pausable, ERC721Holder {
         require(_revealBlock > block.number /*+ 255*/, "Duration too short");
         
         for(uint8 i=0; i < _tokenIds.length; i++){
+            address ownerOfToken = _nftContract.ownerOf(_tokenIds[i]);
+            require(msg.sender == ownerOfToken || msg.sender == address(_nftContract), "Sender is the NFT owner or the nft contract itself"); 
             _escrow(msg.sender, _nftContract, _tokenIds[i]);
         }
 

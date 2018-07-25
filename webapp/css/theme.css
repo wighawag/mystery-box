@@ -251,7 +251,7 @@ section {
 }
 
 .section__content--p30 {
-    padding: 0 30px;
+    padding: 0 50px;
 }
 
 @media (max-width: 991px) {
@@ -2686,7 +2686,7 @@ section {
 }
 
 .header__navbar ul li a i {
-    margin-right: 13px;
+    margin-right: 23px;
 }
 
 .header__navbar ul li a:hover {
@@ -2838,6 +2838,30 @@ section {
     .header__tool .account-item > .content {
         display: none;
     }
+}
+
+.bot-line {
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    background: #4272d7;
+    left: 0;
+    bottom: 0;
+    opacity: 0;
+    -webkit-transform: scale(0);
+    -moz-transform: scale(0);
+    -ms-transform: scale(0);
+    -o-transform: scale(0);
+    transform: scale(0);
+    -webkit-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    -webkit-transform-origin: top center;
+    -moz-transform-origin: top center;
+    -ms-transform-origin: top center;
+    -o-transform-origin: top center;
+    transform-origin: top center;
 }
 
 .bot-line {

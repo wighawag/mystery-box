@@ -8,6 +8,8 @@ import "openzeppelin-solidity/contracts/token/ERC721/ERC721Holder.sol";
 contract MysteryBoxSale is Pausable, ERC721Holder {
   
     uint256 lastMysteryBoxId;
+    uint256[] mysteryBoxesList;
+    mapping (uint256 => uint256) mysteryBoxesListIndex;
 
     struct MysteryBox {
         ERC721 nftContract; //TODO array //TODO suppor tmultiple 721 or support erc1155
@@ -48,12 +50,16 @@ contract MysteryBoxSale is Pausable, ERC721Holder {
             _escrow(msg.sender, _nftContract, _tokenIds[i]);
         }
 
-        mysteryBoxes[++lastMysteryBoxId] = MysteryBox(
+        uint256 mysteryBoxId = ++lastMysteryBoxId;
+        mysteryBoxes[mysteryBoxId] = MysteryBox(
             _nftContract,
             _tokenIds, 
             msg.sender,
             uint128(_price), 
             uint64(_revealBlock));
+
+        _addMysteryBox(mysteryBoxId);
+
         // emit AuctionCreated(_tokenId, _startingPrice, _endingPrice, _duration);
     }
 
@@ -68,20 +74,80 @@ contract MysteryBoxSale is Pausable, ERC721Holder {
 
     //TODO withdraw money for seller
 
-    function getMysteryBox(uint256 _mysteryBoxId) 
-        external 
-        view 
+
+    function _addMysteryBox(uint256 _mysteryBoxId) {
+        uint256 length = mysteryBoxesList.length;
+        mysteryBoxesList.push(_mysteryBoxId);
+        mysteryBoxesListIndex[_mysteryBoxId] = length;
+    }
+
+    function _removeMysteryBox(uint256 _mysteryBoxId) {
+        require(mysteryBoxesList.length > 0, "no mystery box exists");
+        uint256 index = mysteryBoxesListIndex[_mysteryBoxId];
+        uint256 lastIndex = mysteryBoxesList.length - 1;
+        uint256 lastMysteryBoxIdAdded = mysteryBoxesList[lastIndex];
+
+        mysteryBoxesList[index] = lastMysteryBoxIdAdded;
+        mysteryBoxesList[lastIndex] = 0;
+        // Note that this will handle single-element arrays. In that case, both index and lastIndex are going to
+        // be zero. Then we can make sure that we will remove _mysteryBoxId from the mysteryBoxList since we are first swapping
+        // the lastMysteryBoxIdAdded to the first position, and then dropping the element placed in the last position of the list
+
+        mysteryBoxesList.length--;
+        mysteryBoxesListIndex[_mysteryBoxId] = 0;
+        mysteryBoxesListIndex[lastMysteryBoxIdAdded] = index;
+    }
+
+    function numOfMysteryBoxes() public view returns (uint256) {
+        return mysteryBoxesList.length;
+    }
+
+
+    // function getMysteryBox(uint256 _mysteryBoxId) 
+    //     external 
+    //     view 
+    //     returns
+    // (
+    //     // ERC721 nftContract, //TODO array //TODO suppor tmultiple 721 or support erc1155
+    //     // uint256[] tokenIds,
+    //     address seller,
+    //     uint256 price,
+    //     uint256 revealBlock
+    // ) {
+    //     MysteryBox memory mysteryBox = mysteryBoxes[_mysteryBoxId];
+    //     // nftContract = mysteryBox.nftContract;
+    //     // tokenIds = mysteryBox.tokenIds;
+    //     seller = mysteryBox.seller;
+    //     price = mysteryBox.price;
+    //     revealBlock = mysteryBox.revealBlock;
+    // }
+
+    function getMysteryBoxByIndex(
+        uint256 _index
+    )
+        public
+        view
         returns
     (
+        ERC721 nftContract, //TODO array //TODO suppor tmultiple 721 or support erc1155
+        uint256[] tokenIds,
         address seller,
         uint256 price,
         uint256 revealBlock
     ) {
-        MysteryBox memory mysteryBox = mysteryBoxes[_mysteryBoxId];
+        require(_index < mysteryBoxesList.length);
+
+        MysteryBox memory mysteryBox = mysteryBoxes[mysteryBoxesList[_index]];
+        nftContract = mysteryBox.nftContract;
+        tokenIds = mysteryBox.tokenIds;
         seller = mysteryBox.seller;
         price = mysteryBox.price;
         revealBlock = mysteryBox.revealBlock;
+
+        // return getMysteryBox(mysteryBoxesList[_index]);
     }
+
+    
 
     /// @dev If this contract isn't approved it will throw
     function _escrow(address _ownerOfToken, ERC721 _nftContract, uint256 _tokenId) internal {

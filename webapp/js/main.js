@@ -29,12 +29,13 @@ function initContract(web3){
     .then(function(networkId) {
       return axios.all([axios.get('MysteryBoxSale.json'), axios.get('Item.json')])
         .then(function(response){
-          var availableNetworks = response[0].data.networks;
-          if (availableNetworks[networkId]) {
-            console.log("found network " + networkId, availableNetworks[networkId]);
+          var availableNetworksMystery = response[0].data.networks;
+          var availableNetworksItem = response[1].data.networks;
+          if (availableNetworksMystery[networkId]) {
+            console.log("found network " + networkId, availableNetworksMystery[networkId]);
             var contractList=[];
-            contractList.push(new web3.eth.Contract(response[0].data.abi,availableNetworks[networkId].address));
-            contractList.push(new web3.eth.Contract(response[1].data.abi,availableNetworks[networkId].address));
+            contractList.push(new web3.eth.Contract(response[0].data.abi,availableNetworksMystery[networkId].address));
+            contractList.push(new web3.eth.Contract(response[1].data.abi,availableNetworksItem[networkId].address));
             return contractList
           } else {
             var supportedNetworks = Object.keys(availableNetworks);

@@ -72,13 +72,20 @@ function addAuction(){
 }
 
 function mint(){
-  // var seller = web3.eth.accounts[0];
-  var ItemContract = contractList[1]
-  console.log(ItemContract)
-  // web3.eth.getAccounts(console.log)
-  web3.eth.getAccounts().then(e => console.log(e));
+
+  web3.eth.getAccounts().then(account => {
+    
+    var ItemContract = contractList[1]    
+    var promiEvent = ItemContract.methods.mint('ipfs hash id').send({from: account[0], gas: 400000})
+    promiEvent.on("transactionHash", function(txHash){
+      console.log(`txHash: ${txHash}`)
+    });
+    promiEvent.then(function(txReceipt){
+      console.log(`txRe: ${JSON.stringify(txReceipt)}`)
+
+    });
+  });
 
 
-  // ItemContract.methods.mint('ipfs hash id').send({from: seller, gas: 4000000});
 
 }

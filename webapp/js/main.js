@@ -1,6 +1,4 @@
-
 const contractList=[];
-
 
 function whenDocumentReady(fn) {
   if (document.readyState == "complete") {
@@ -52,7 +50,7 @@ function initContract(web3){
             throw "wrong network";
           }
         });
-    });con
+    });
 }
 
 whenDocumentReady(function() {
@@ -60,42 +58,44 @@ whenDocumentReady(function() {
     .then(function(contract){
       console.log("contract initialised 1", contract[0]._address);
       console.log("contract initialised 2", contract[1]._address)
-      getBalance()
+      getBalance();
   })
     .catch(function(error){console.error(error);})
 });
 
+
 function getChecked(){
-    var selectedList = [];
-    $('.form-check-input:checkbox:checked').each(checked =>{
-      selectedList.push(checked+1);
-    });
-    console.log(`selectedList: ${selectedList}`)
-    return selectedList
+  var selectedList = [];
+  $('.form-check-input:checkbox:checked').each(checked =>{
+    selectedList.push(checked+1);
+  });
+  console.log(`selectedList: ${selectedList}`)
+  return selectedList
 
 }
 
 function addAuction(){
 
-  var selectedList = getChecked();
-  var ItemContract = contractList[1]
+var selectedList = getChecked();
+var ItemContract = contractList[1]
 
 
-  web3.eth.getAccounts().then(account => {
-    var MysteryBoxContractAddress = Web3.utils.toChecksumAddress(contractList[0]._address)    
-    var ItemContractAddress = Web3.utils.toChecksumAddress(contractList[1]._address)    
-    console.log(`address mys: ${MysteryBoxContractAddress}`)
-    console.log(`address item: ${ItemContractAddress}`)
-    console.log(`accounts: ${account[0]}`)
-    var ItemContract = contractList[1]  
-    var promiEvent = ItemContract.methods.approveAndCreateMysteryBox(MysteryBoxContractAddress, [3], 100, 33).send({from: account[0], gas: 400000});
-    promiEvent.on("transactionHash", function(txHash){
-      console.log(`txHash: ${txHash}`)
-    });
-    promiEvent.then(function(txReceipt){
-      console.log(`txRe: ${JSON.stringify(txReceipt)}`)
-    });
-  })
+web3.eth.getAccounts().then(account => {
+  var MysteryBoxContractAddress = Web3.utils.toChecksumAddress(contractList[0]._address)    
+  var ItemContractAddress = Web3.utils.toChecksumAddress(contractList[1]._address)    
+  console.log(`address mys: ${MysteryBoxContractAddress}`)
+  console.log(`address item: ${ItemContractAddress}`)
+  console.log(`accounts: ${account[0]}`)
+  var ItemContract = contractList[1]  
+  // TODO items in box length
+  var promiEvent = ItemContract.methods.approveAndCreateMysteryBox(MysteryBoxContractAddress, [4, 6], 200, 43).send({from: account[0], gas: 800000});
+  promiEvent.on("transactionHash", function(txHash){
+    console.log(`txHash: ${txHash}`)
+  });
+  promiEvent.then(function(txReceipt){
+    console.log(`txRe: ${JSON.stringify(txReceipt)}`)
+  });
+})
 
 
 
@@ -104,30 +104,30 @@ function addAuction(){
 
 function mint(){
 
-  web3.eth.getAccounts().then(account => {
-    var ItemContract = contractList[1]  
-    var promiEvent = ItemContract.methods.mint('random1').send({from: account[0], gas: 400000})
-    promiEvent.on("transactionHash", function(txHash){
-      console.log(`txHash: ${txHash}`)
-    });
-    promiEvent.then(function(txReceipt){
-      console.log(`txRe: ${JSON.stringify(txReceipt)}`)
-    });
+web3.eth.getAccounts().then(account => {
+  var ItemContract = contractList[1]  
+  var promiEvent = ItemContract.methods.mint('random1').send({from: account[0], gas: 400000})
+  promiEvent.on("transactionHash", function(txHash){
+    console.log(`txHash: ${txHash}`)
   });
+  promiEvent.then(function(txReceipt){
+    console.log(`txRe: ${JSON.stringify(txReceipt)}`)
+  });
+});
 
 }
 
 function getBalance(){
-  web3.eth.getAccounts().then(account => {
-    var ItemContract = contractList[1]    
-    ItemContract.methods.balanceOf(account[0]).call().then(numberOfTokens => {
-      console.log(`results: ${JSON.stringify(numberOfTokens)}`)
-      var tokenList = Array.apply(null, {length: numberOfTokens}).map(Number.call, Number)
-      tokenList.forEach(i => {
-        ItemContract.methods.tokenDataOfOwnerByIndex(account[0], i).call().then(re =>{
-          console.log(`re: ${JSON.stringify(re)}`)
-        })
+web3.eth.getAccounts().then(account => {
+  var ItemContract = contractList[1]    
+  ItemContract.methods.balanceOf(account[0]).call().then(numberOfTokens => {
+    console.log(`results: ${JSON.stringify(numberOfTokens)}`)
+    var tokenList = Array.apply(null, {length: numberOfTokens}).map(Number.call, Number)
+    tokenList.forEach(i => {
+      ItemContract.methods.tokenDataOfOwnerByIndex(account[0], i).call().then(re =>{
+        console.log(`re: ${JSON.stringify(re)}`)
       })
     })
   })
+})
 }

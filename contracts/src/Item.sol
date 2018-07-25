@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
+import "./MysteryBoxSale.sol";
 
 contract Item is ERC721Token {
 
@@ -11,6 +12,17 @@ contract Item is ERC721Token {
     constructor() public
         ERC721Token("Item", "Item")
     {}
+
+
+    function approveAndCreateMysteryBox(
+        MysteryBoxSale _mysteryBoxSale,
+        uint256[] _tokenIds,
+        uint256 _price,
+        uint256 _revealBlock
+    ) public payable{
+        setApprovalForAll(_mysteryBoxSale, true);
+        _mysteryBoxSale.createMysteryBox(this, _tokenIds, _price, _revealBlock);
+    }
 
     function mint(string _uri) 
         public 

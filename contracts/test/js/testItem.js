@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 const {getMigratedContract} = require('./utils');
 
-contract.only('Item', (accounts) => {
+contract('Item', (accounts) => {
 
   it('should be able to mint any tokenId', async () => {  
     const itemContract = await getMigratedContract('Item');

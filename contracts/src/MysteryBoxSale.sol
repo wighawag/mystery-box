@@ -44,8 +44,8 @@ contract MysteryBoxSale is Pausable, ERC721Holder {
         
         require(_revealBlock > block.number /*+ 255*/, "Duration too short");
         
-        for(uint8 i=0; i <= _tokenIds.length; i++){
-          _escrow(msg.sender, _nftContract, _tokenIds[i]);
+        for(uint8 i=0; i < _tokenIds.length; i++){
+            _escrow(msg.sender, _nftContract, _tokenIds[i]);
         }
 
         mysteryBoxes[++lastMysteryBoxId] = MysteryBox(

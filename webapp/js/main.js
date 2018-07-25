@@ -21,15 +21,22 @@ function initWeb3(){
   }
   return new Web3(web3Provider);
 }
+
+
+
 function initContract(web3){
   return web3.eth.net.getId()
     .then(function(networkId) {
-      return axios.get("MysteryBoxSale.json")
+      return axios.all([axios.get('MysteryBoxSale.json'), axios.get('Item.json')])
         .then(function(response){
-          var availableNetworks = response.data.networks;
-          if (availableNetworks[networkId]) {
-            console.log("found network " + networkId, availableNetworks[networkId]);
-            return  new web3.eth.Contract(response.data.abi,availableNetworks[networkId].address)
+          var availableNetworksMystery = response[0].data.networks;
+          var availableNetworksItem = response[1].data.networks;
+          if (availableNetworksMystery[networkId]) {
+            console.log("found network " + networkId, availableNetworksMystery[networkId]);
+            var contractList=[];
+            contractList.push(new web3.eth.Contract(response[0].data.abi,availableNetworksMystery[networkId].address));
+            contractList.push(new web3.eth.Contract(response[1].data.abi,availableNetworksItem[networkId].address));
+            return contractList
           } else {
             var supportedNetworks = Object.keys(availableNetworks);
             var message = "Please switch to one of the following networks : ";
@@ -47,6 +54,9 @@ function initContract(web3){
 
 whenDocumentReady(function() {
   initContract(initWeb3())
-    .then(function(contract){console.log("contract initialised", contract);})
+    .then(function(contract){
+      console.log("contract initialised 1", contract[0]);
+      console.log("contract initialised 2", contract[1])
+  })
     .catch(function(error){console.error(error);})
 });

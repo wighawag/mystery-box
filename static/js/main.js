@@ -21,6 +21,10 @@ function initWeb3(){
   }
   return new Web3(web3Provider);
 }
+
+function testing(){
+  console.log(`testing alot`)
+}
 function initContract(web3){
   return web3.eth.net.getId()
     .then(function(networkId) {
@@ -49,4 +53,8 @@ whenDocumentReady(function() {
   initContract(initWeb3())
     .then(function(contract){console.log("contract initialised", contract);})
     .catch(function(error){console.error(error);})
+
+
 });
+
+

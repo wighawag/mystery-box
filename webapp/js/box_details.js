@@ -1,12 +1,17 @@
-function displayAuctions (){
+
+
+function getID (){
+    var mysteryID = window.location.hash
+    console.log(`${mysteryID.slice(1, mysteryID.length)}`)
+    return mysteryID.slice(1, mysteryID.length)
+}
+
+function displayBoxItems(mysteryID){
 
     // web3 call all auctions function
 
     var mysteryName = "hiii";
-    var mysteryID = "86293";
     var mysteryDescription = "jlahdfa";
-    var mysteryReveal = 2
-    var mysteryClose = 1
     var imageSrc= "images/Sample NFTs/King_BIG.png" //TODO needs to be random
 
     var $tablebody = $(`
@@ -22,10 +27,6 @@ function displayAuctions (){
                     <span class="block-email">${mysteryID}</span>
                 </td>
                 <td class="desc">${mysteryDescription}</td>
-                <td>${mysteryReveal}</td>
-                <td>
-                    <span class="status--process">${mysteryClose}</span>
-                </td>
             </tr>;
             `)
         $tablebody.on('click',_=>{bidAuction(mysteryID)});
@@ -64,6 +65,6 @@ function bidAuction(mysteryID){
 
 }
 
-displayAuctions()
-
+var ID = getID();
+displayBoxItems(ID);
 

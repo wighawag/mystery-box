@@ -1,20 +1,26 @@
 # mystery-box
 
-
-Install homebrew (mac) 
-install yarn - should be 1.7.0
-
-RUNNING GANACHE
-cd  mystery-box/contract/ 
-yarn --> this installs all dependencies
-yarn ganache --> runs ganache on localhost
-
-DEPLOY CONTRACTS
-cd mystery-box/contract/
-yarn truffle migrate --network localhost
-
-
-RUNNING WEBAPP
-cd mystery-box/
+setting up contracts
+```
+cd contracts
 yarn
-yarn serve --> serves webapp on localhost
+yarn truffle test
+```
+
+serving static webpage locally (via browsersync, see bs-config.json)
+```
+yarn
+yarn serve
+```
+
+running ganache on localhost:8545
+```
+cd contracts
+yarn ganache
+```
+
+deploying contracts on the running ganache
+```
+cd contracts
+yarn truffle migrate --network localhost
+```

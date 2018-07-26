@@ -119,11 +119,17 @@ function displayAuctions (){
                     var mysteryID = element.tokenIds.length;
                     var mysteryPart = element.participants.length;
                     var mysteryReveal = element.revealBlock - latestBlock.number;
+                    var mysteryRevealHash = element.revealHash;
+                    console.log(mysteryRevealHash)
                     if(mysteryReveal < 0){
-                        mysteryReveal = "revealing..."
+                        mysteryReveal = "Revealed"
+                        var imageSrc = `images/Sample NFTs/${imgList[element.tokenIds[0]]}` 
+                        console.log(`id:${id}`)
+                        console.log(`toid: ${element.tokenIds}`)
+                        console.log(`imgList[element.tokenIds[id]]: ${imgList[element.tokenIds[0]]}`)
+                    } else {
+                        var imageSrc= "/landing/img/hero-img.png" //TODO needs link to tokenIds
                     }
-                    var mysteryClose = element.revealBlock-5
-                    var imageSrc= "/landing/img/hero-img.png" //TODO needs link to tokenIds
                     var mysteryContractAddress = element.price
                 
                     var $tablebody = $(`

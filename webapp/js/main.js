@@ -123,18 +123,30 @@ getBalance()
 
 }
 
-function mint(){
+function hashCode (str){
+  var hash = 0;
+  if (str.length == 0) return hash;
+  for (i = 0; i < str.length; i++) {
+      char = str.charCodeAt(i);
+      hash = ((hash<<5)-hash)+char;
+      hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+}
 
-web3.eth.getAccounts().then(account => {
-  var ItemContract = contractList[1]  
-  var promiEvent = ItemContract.methods.mint('random1').send({from: account[0], gas: 400000})
-  promiEvent.on("transactionHash", function(txHash){
-    console.log(`txHash: ${txHash}`)
+function mint(){
+  var hh=Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  var uri=`ipfs:${hh}/`
+  web3.eth.getAccounts().then(account => {
+    var ItemContract = contractList[1]  
+    var promiEvent = ItemContract.methods.mint(uri).send({from: account[0], gas: 400000})
+    promiEvent.on("transactionHash", function(txHash){
+      console.log(`txHash: ${txHash}`)
+    });
+    promiEvent.then(function(txReceipt){
+      console.log(`txRe: ${JSON.stringify(txReceipt)}`)
+    });
   });
-  promiEvent.then(function(txReceipt){
-    console.log(`txRe: ${JSON.stringify(txReceipt)}`)
-  });
-});
 
 }
 

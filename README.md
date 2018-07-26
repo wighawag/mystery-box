@@ -16,7 +16,8 @@ yarn serve
 running ganache on localhost:8545
 ```
 cd contracts
-yarn ganache
+yarn ganache -b 2 
+(b --> block auto mine every 2 sections -s "seed" to make sure you get same account )
 ```
 
 deploying contracts on the running ganache

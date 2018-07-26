@@ -105,9 +105,9 @@ contract('mysterybox ownership', (accounts) => {
     await itemContract.methods.mint('ipfs hash id').send({from: seller, gas: 4000000});
     await itemContract.methods.mint('ipfs hash id').send({from: seller, gas: 4000000});
     await itemContract.methods.mint('ipfs hash id').send({from: seller, gas: 4000000});
-    await itemContract.methods.approveAndCreateMysteryBox(mysteryBoxSaleContract.options.address, [1, 3, 5], 100, 33).send({from: seller, gas: 4000000});
+    await itemContract.methods.approveAndCreateMysteryBox(mysteryBoxSaleContract.options.address, [1, 3, 5], 100000000, 33).send({from: seller, gas: 4000000});
 
-    await mysteryBoxSaleContract.methods.buy(1).send({from: buyer, gas: 4000000, value: 100});
+    await mysteryBoxSaleContract.methods.buy(1).send({from: buyer, gas: 4000000, value: 100000000});
 
     await stopAutoMine();
     await mine(33);
@@ -117,15 +117,12 @@ contract('mysterybox ownership', (accounts) => {
 
     await mysteryBoxSaleContract.methods.withdraw(1, 0).send({from: anyone, gas: 4000000});
 
+    const sellerBalanceBefore = new BN(await web3.eth.getBalance(seller));
     await mysteryBoxSaleContract.methods.withdrawToSeller(1).send({from: anyone, gas: 4000000});
+    const sellerBalanceAfter = new BN(await web3.eth.getBalance(seller));
 
-    const tokenIdOwnedByBuyer = itemContract.methods.tokenOfOwnerByIndex(buyer, 0);
-    if (tokenIdOwnedByBuyer === 1) {
-      const ownerOfAsset = await itemContract.methods.ownerOf(2).call();
-      assert.equal(ownerOfAsset, seller);
-    } else {
-      const ownerOfAsset = await itemContract.methods.ownerOf(1).call();
-      assert.equal(ownerOfAsset, seller);
-    }
+    const sellerTokenBalance = await itemContract.methods.balanceOf(seller).call();
+    assert.equal(sellerTokenBalance, 4);
+    assert.isTrue(sellerBalanceAfter.sub(sellerBalanceBefore).gt(new BN(90000000)));
   });
 });

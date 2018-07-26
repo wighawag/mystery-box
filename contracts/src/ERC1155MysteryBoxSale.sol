@@ -1,27 +1,26 @@
 pragma solidity ^0.4.24;
 
-import "openzeppelin-solidity/contracts/token/ERC721/ERC721.sol";
-import "openzeppelin-solidity/contracts/token/ERC721/ERC721Holder.sol";
+import "./erc1155/ERC1155.sol";
 
-contract MysteryBoxSale is ERC721Holder {
+contract ERC1155MysteryBoxSale {
   
     uint256 lastMysteryBoxId;
     uint256[] mysteryBoxesList;
     mapping (uint256 => uint256) mysteryBoxesListIndex;
 
     struct MysteryBox {
-        ERC721 nftContract; //TODO array //TODO suppor tmultiple 721 or support erc1155
-        uint256[] tokenIds;
+        ERC1155 erc1155Contract; //TODO array //TODO support multiple erc1155?
+        uint256[] tokenTypes;
+        uint256[] totalSoFar;
         address seller;
         uint128 price;
         uint64 revealBlock;
+        uint256 totalSum;
         address[] participants;
         bytes32 revealHash;
     }
 
     mapping (uint256 => MysteryBox) private mysteryBoxes;
-
-    bytes4 constant InterfaceSignature_ERC721 = bytes4(0x4f558e79);
 
     event MysteryBoxCreated(uint256 mysteryBoxId, address seller, uint64 revealBlock);
     event MysteryBoxBought(uint256 mysteryBoxId, address buyer);
@@ -29,19 +28,21 @@ contract MysteryBoxSale is ERC721Holder {
     event MysteryBoxClosed(uint256 mysteryBoxId);
     
     function createMysteryBox(
-        ERC721 _nftContract, //TODO array
-        uint256[] _tokenIds,
+        ERC1155 _erc1155Contract, //TODO array?
+        uint256[] _tokenTypes,
+        uint256[] _numTokens,
         uint256 _price,
         uint256 _revealBlock
     )
     external
     {   
-        createMysteryBoxWithSeller(_nftContract, _tokenIds, _price, _revealBlock, msg.sender);
+        createMysteryBoxWithSeller(_erc1155Contract, _tokenTypes, _numTokens, _price, _revealBlock, msg.sender);
     }
 
     function createMysteryBoxWithSeller(
-        ERC721 _nftContract, //TODO array
-        uint256[] _tokenIds,
+        ERC1155 _erc1155Contract, //TODO array
+        uint256[] _tokenTypes,
+        uint256[] _numTokens,
         uint256 _price,
         uint256 _revealBlock,
         address _seller
@@ -53,20 +54,25 @@ contract MysteryBoxSale is ERC721Holder {
         
         require(_revealBlock > block.number /*+ 255*/, "Duration too short");
 
-        for(uint8 i=0; i < _tokenIds.length; i++){
-            address ownerOfToken = _nftContract.ownerOf(_tokenIds[i]);
-            require(ownerOfToken == _seller, "only the owner can be seller");
-            require(msg.sender == ownerOfToken || msg.sender == address(_nftContract), "Sender is the NFT owner or the nft contract itself"); 
-            _escrow(ownerOfToken, _nftContract, _tokenIds[i]); // TODO ERC1155 can save gas on multiNFT
+        _erc1155Contract.transferFrom(_seller, this, _tokenTypes, _numTokens);
+
+        uint256 totalSum = 0;
+        uint256[] memory totalSoFar = new uint256[](_numTokens.length);
+        for(uint256 i = 0; i < _numTokens.length; i++) {
+          totalSum += _numTokens[i];
+          totalSoFar[i] = totalSum;
         }
 
         uint256 mysteryBoxId = ++lastMysteryBoxId;
         mysteryBoxes[mysteryBoxId] = MysteryBox(
-            _nftContract,
-            _tokenIds, 
+            _erc1155Contract,
+            _tokenTypes,
+            totalSoFar, 
             _seller,
-            uint128(_price), 
-            uint64(_revealBlock), new address[](0), 0);
+            uint128(_price),
+            uint64(_revealBlock),
+            totalSum,
+            new address[](0), 0);
 
         _addMysteryBox(mysteryBoxId);
 
@@ -89,7 +95,7 @@ contract MysteryBoxSale is ERC721Holder {
 
         require(msg.value >= mysteryBoxes[_mysteryBoxId].price, "Not enough money for the bid");
         uint256 numParticipants = mysteryBoxes[_mysteryBoxId].participants.length;
-        require(numParticipants < mysteryBoxes[_mysteryBoxId].tokenIds.length, "mystery box has been all purchased");
+        require(numParticipants < mysteryBoxes[_mysteryBoxId].totalSum, "mystery box has been all purchased");
 
         mysteryBoxes[_mysteryBoxId].participants.push(recipient);
         
@@ -132,11 +138,15 @@ contract MysteryBoxSale is ERC721Holder {
         require(mysteryBox.revealHash != 0, "mystery box has not been revealed");
         require(mysteryBox.seller != 0, "mysterybox already closed");
 
-        uint256 firstTokenIndex = (uint256(mysteryBox.revealHash) + mysteryBox.participants.length) % mysteryBox.tokenIds.length;
-        for(uint8 i = 0; i < mysteryBox.tokenIds.length - mysteryBox.participants.length; i++) { //TODO break loop (gaslimit issue)
-            uint256 tokenIndex = (firstTokenIndex + i) % mysteryBox.tokenIds.length;
-            mysteryBox.nftContract.transferFrom(this, mysteryBox.seller, mysteryBox.tokenIds[tokenIndex]);
-        }
+        // TODO : loop over itemTypes and take all until it reloop modulo in which case you need to take as much as the next one ?
+        // => can compute first and last position taken by other and take all
+
+        // uint256 firstTokenIndex = (uint256(mysteryBox.revealHash) + mysteryBox.participants.length) % mysteryBox.tokenIds.length;
+        // for(uint8 i = 0; i < mysteryBox.tokenIds.length - mysteryBox.participants.length; i++) { //TODO break loop (gaslimit issue)
+        //     uint256 tokenIndex = (firstTokenIndex + i) % mysteryBox.tokenIds.length;
+        //     mysteryBox.nftContract.transferFrom(this, mysteryBox.seller, mysteryBox.tokenIds[tokenIndex]);
+        // }
+        
         mysteryBox.seller.transfer(mysteryBox.participants.length * mysteryBox.price);
 
         mysteryBox.seller = 0;
@@ -157,20 +167,34 @@ contract MysteryBoxSale is ERC721Holder {
     //     mysteryBox.tokenIds.length --;
     // }
 
-    function withdraw(uint256 _mysteryBoxId, uint256 _participantIndex) 
+    // TODO different multicast transfer possible
+    function withdraw(uint256 _mysteryBoxId, uint256[] _participantIndices) 
         external 
     {
         MysteryBox memory mysteryBox = mysteryBoxes[_mysteryBoxId];
         require(mysteryBox.revealHash != 0, "mystery box has not been revealed");
-        require(_participantIndex < mysteryBox.participants.length, "particpantIndex to big");
+        require(_participantIndices.length <= mysteryBox.participants.length, "particpantIndices to big");
         
-        uint256 tokenId = getTokenReceived(_mysteryBoxId, _participantIndex);
-        mysteryBox.nftContract.transferFrom(this, mysteryBox.participants[_participantIndex], tokenId); // will fails if attempted twice
+        address[] memory tos = new address[](_participantIndices.length);
+        uint256[] memory tokenTypes = new uint256[](_participantIndices.length);
+        uint256[] memory numTokens = new uint256[](_participantIndices.length);
+        for(uint256 i = 0 ; i < _participantIndices.length; i++) {
+            tos[i] = mysteryBox.participants[_participantIndices[i]];
+            tokenTypes[i] = getTokenTypeReceived(_mysteryBoxId, _participantIndices[i]);
+            numTokens[i] = 1;
+        }
+        
+        mysteryBox.erc1155Contract.transferMulticast(tos, tokenTypes, numTokens);
     }
 
-    function getTokenReceived(uint256 _mysteryBoxId, uint256 _participantIndex) public view returns(uint256 tokenId) {
+    function getTokenTypeReceived(uint256 _mysteryBoxId, uint256 _participantIndex) public view returns(uint256 tokenType) {
         MysteryBox memory mysteryBox = mysteryBoxes[_mysteryBoxId];
-        return mysteryBox.tokenIds[(uint256(mysteryBox.revealHash) + _participantIndex) % mysteryBox.tokenIds.length]; // TODO shuffle indexes on buy
+        uint256 position = (uint256(mysteryBox.revealHash) + _participantIndex) % mysteryBox.totalSum;
+        uint256 i = 0;// TODO log2 : mysteryBox.tokenTypes.length / 2;
+        while(mysteryBox.totalSoFar[i] < position){
+          i++;
+        }
+        return mysteryBox.tokenTypes[i];
     }
 
     function _addMysteryBox(uint256 _mysteryBoxId) internal{
@@ -201,25 +225,6 @@ contract MysteryBoxSale is ERC721Holder {
     }
 
 
-    // function getMysteryBox(uint256 _mysteryBoxId) 
-    //     external 
-    //     view 
-    //     returns
-    // (
-    //     // ERC721 nftContract, //TODO array //TODO suppor tmultiple 721 or support erc1155
-    //     // uint256[] tokenIds,
-    //     address seller,
-    //     uint256 price,
-    //     uint256 revealBlock
-    // ) {
-    //     MysteryBox memory mysteryBox = mysteryBoxes[_mysteryBoxId];
-    //     // nftContract = mysteryBox.nftContract;
-    //     // tokenIds = mysteryBox.tokenIds;
-    //     seller = mysteryBox.seller;
-    //     price = mysteryBox.price;
-    //     revealBlock = mysteryBox.revealBlock;
-    // }
-
     function getMysteryBoxByIndex(
         uint256 _index
     )
@@ -228,9 +233,9 @@ contract MysteryBoxSale is ERC721Holder {
         returns
     (
         uint256 id,
-        ERC721 nftContract, //TODO array //TODO suppor tmultiple 721 or support erc1155
-        uint256[] tokenIds,
-        address[] participants,
+        ERC1155 erc1155Contract, //TODO array //TODO suppor tmultiple 721 or support erc1155
+        uint256[] tokenTypes,
+        uint256[] totalSoFar,
         address seller,
         uint256 price,
         uint256 revealBlock,
@@ -241,22 +246,16 @@ contract MysteryBoxSale is ERC721Holder {
 
         id = mysteryBoxesList[_index];
         MysteryBox memory mysteryBox = mysteryBoxes[id];
-        nftContract = mysteryBox.nftContract;
-        tokenIds = mysteryBox.tokenIds;
+        erc1155Contract = mysteryBox.erc1155Contract;
+        tokenTypes = mysteryBox.tokenTypes;
+        totalSoFar = mysteryBox.totalSoFar;
         seller = mysteryBox.seller;
         price = mysteryBox.price;
-        participants = mysteryBox.participants;
         revealBlock = mysteryBox.revealBlock;
         participants = mysteryBox.participants;
         // return getMysteryBox(mysteryBoxesList[_index]);
     }
 
-    
-
-    /// @dev If this contract isn't approved it will throw
-    function _escrow(address _ownerOfToken, ERC721 _nftContract, uint256 _tokenId) internal {
-        _nftContract.transferFrom(_ownerOfToken, this, _tokenId);
-    }
 
     function _isMysteryBoxOnSale(uint256 _mysteryBoxId) internal view returns(bool) {
         return mysteryBoxes[_mysteryBoxId].revealBlock > block.number;

@@ -178,15 +178,15 @@ function displayBoxItems(){
                 $(`#payment-button-amount`).html(element.price)
                 mysteryID.forEach(e =>{
                     console.log(`e: ${e}`)
-                    ItemContract.methods.tokenDataOfOwnerByIndex(MysteryContract._address, e).call().then(re =>{
+                    ItemContract.methods.tokenURI(e).call().then(re =>{
                         console.log(`re: ${JSON.stringify(re)}`)
-                        if (re.tokenId < imgList.length) {
-                            var imgFile = imgList[re.tokenId];
+                        if (e < imgList.length) {
+                            var imgFile = imgList[e];
                           } else {
-                            var imgFile = imgList[re.tokenId % imgList]
+                            var imgFile = imgList[e % imgList]
                           }
                         var tokenIds = e;
-                        var tokenURI = re.uri;
+                        var tokenURI = re;
                         var imageSrc= `images/Sample NFTs/${imgFile}` 
                         var $tablebody = $(`
                         <tr class="spacer"></tr>
@@ -202,7 +202,7 @@ function displayBoxItems(){
                         <td>${tokenURI}</td>
                         </tr>;
                         `)
-                        $tablebody.on('click',_=>{bidAuction(id)});
+                        $tablebody.on('click',_=>{bidAuction(element.id)});
                         $('#detailTable').find('tbody').append($tablebody);
                     })
                     })
@@ -221,7 +221,7 @@ function bidding(){
     
     web3.eth.getAccounts().then(account => {        
         var buyer = account[0];
-        MysteryContract.methods.buy(id+1).send({from: buyer, value: price, gas: 4000000});
+        MysteryContract.methods.buy(id).send({from: buyer, value: price, gas: 4000000});
     })
 }
 

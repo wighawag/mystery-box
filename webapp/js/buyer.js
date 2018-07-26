@@ -159,12 +159,13 @@ function bidding(){
     var id = parseInt(getID())
     console.log(`bid: `, id)
     var MysteryContract = contractList[0];
-    var bid=$('#bidPrice').val()
-    console.log(`bid: ${bid}`)
 
+    //TODO get price
+    var price = Big(20).times(Big("1000000000000000000")).toString();
+    
     web3.eth.getAccounts().then(account => {        
         var buyer = account[0];
-        MysteryContract.methods.buy(id+1).send({from: buyer, to: MysteryContract.address, value: 20, gas: 4000000});
+        MysteryContract.methods.buy(id+1).send({from: buyer, to: MysteryContract.address, value: price, gas: 4000000});
     })
 }
 

@@ -74,11 +74,29 @@ function getChecked(){
 
 }
 
+function getRevealDelta(){
+  var delta = 15;
+  // console.log(`selectedList: ${selectedList}`)
+  return delta;
+}
+
+function getPrice(){
+  var price = 20;
+  // console.log(`selectedList: ${selectedList}`)
+  return price;
+}
+
+
 function addAuction(){
 
 var selectedList = getChecked();
+console.log(selectedList);
 var ItemContract = contractList[1]
 
+var delta = getRevealDelta();
+var price = Big(getPrice()).times(Big("1000000000000000000")).toString();
+
+console.log('price', price);
 
 web3.eth.getAccounts().then(account => {
   var MysteryBoxContractAddress = Web3.utils.toChecksumAddress(contractList[0]._address)    
@@ -88,7 +106,7 @@ web3.eth.getAccounts().then(account => {
   console.log(`accounts: ${account[0]}`)
   var ItemContract = contractList[1]  
   // TODO items in box length
-  var promiEvent = ItemContract.methods.approveAndCreateMysteryBoxUsingBlockDelta(MysteryBoxContractAddress, [1,2], 20, 15).send({from: account[0], gas: 400000});
+  var promiEvent = ItemContract.methods.approveAndCreateMysteryBoxUsingBlockDelta(MysteryBoxContractAddress, selectedList, price, delta).send({from: account[0], gas: 400000});
   promiEvent.on("transactionHash", function(txHash){
     console.log(`txHash: ${txHash}`)
   });

@@ -83,7 +83,7 @@ function displayAuctions (){
                 var mysteryReveal = element.revealBlock
                 var mysteryClose = element.revealBlock-5
                 var imageSrc= "/landing/img/hero-img.png" //TODO needs link to tokenIds
-                var mysteryContractAddress = element.nftContract
+                var mysteryContractAddress = element.price
             
                 var $tablebody = $(`
                         <tr class="spacer"></tr>

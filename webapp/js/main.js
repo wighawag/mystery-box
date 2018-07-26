@@ -1,4 +1,40 @@
+
 const contractList=[];
+const imgList=[ 'AirBubble.png',
+'AmmoRocket.png',
+'Antivirus.png',
+'Apple.png',
+'Arnold.png',
+'Arnold_BIG.png',
+'Banana.png',
+'Barrel.png',
+'Bear.png',
+'BlackCat.png',
+'BritishHouse.png',
+'Car.png',
+'Caveman_BIG.png',
+'ClydeGhost.png',
+'CoinX300.png',
+'Controllable_BIG.png',
+'Deer.png',
+'DinoBoss_BIG.png',
+'DonutRed.png',
+'EctoCar.png',
+'Fire.png',
+'GizaPyramyd.png',
+'Helicopter.png',
+'Iglu.png',
+'King_BIG.png',
+'Meat.png',
+'MinerHeart.png',
+'Mushroom.png',
+'Pacman_BIG.png',
+'PineBig.png',
+'PurpleGem.png',
+'Sheep.png',
+'ShrekKnight.png',
+'Unicorn.png',
+'Zombie.png' ]
 
 function whenDocumentReady(fn) {
   if (document.readyState == "complete") {
@@ -135,6 +171,7 @@ function hashCode (str){
 }
 
 function mint(){
+
   var hh=Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   var uri=`ipfs:${hh}/`
   web3.eth.getAccounts().then(account => {
@@ -150,6 +187,8 @@ function mint(){
 
 }
 
+
+
 function getBalance(){
 web3.eth.getAccounts().then(account => {
   var ItemContract = contractList[1]    
@@ -159,6 +198,14 @@ web3.eth.getAccounts().then(account => {
     tokenList.forEach(i => {
       ItemContract.methods.tokenDataOfOwnerByIndex(account[0], i).call().then(re =>{
         console.log(`re: ${JSON.stringify(re)}`)
+        var $divbody = $(`
+            <div class="radio">
+            <label for="radio1" class="form-check-label ">
+                <input type="checkbox" id="1" name="radios" value="1" class="form-check-input">
+                <img src="images/Sample NFTs/King_BIG.png" alt="Smiley face" height="80px" width="80px">
+           </label>
+         </div>`)
+        $(`.form-check`).append()
       })
     })
   })

@@ -1,5 +1,41 @@
 const contractList=[];
 const mysteryBoxList=[];
+const imgList=[ 'AirBubble.png',
+'AmmoRocket.png',
+'Antivirus.png',
+'Apple.png',
+'Arnold.png',
+'Arnold_BIG.png',
+'Banana.png',
+'Barrel.png',
+'Bear.png',
+'BlackCat.png',
+'BritishHouse.png',
+'Car.png',
+'Caveman_BIG.png',
+'ClydeGhost.png',
+'CoinX300.png',
+'Controllable_BIG.png',
+'Deer.png',
+'DinoBoss_BIG.png',
+'DonutRed.png',
+'EctoCar.png',
+'Fire.png',
+'GizaPyramyd.png',
+'Helicopter.png',
+'Iglu.png',
+'King_BIG.png',
+'Meat.png',
+'MinerHeart.png',
+'Mushroom.png',
+'Pacman_BIG.png',
+'PineBig.png',
+'PurpleGem.png',
+'Sheep.png',
+'ShrekKnight.png',
+'Unicorn.png',
+'Zombie.png' ];
+const mysteryPrice = 0
 
 function whenDocumentReady(fn) {
   if (document.readyState == "complete") {
@@ -101,9 +137,8 @@ function displayAuctions (){
                                 </td>
                                 <td>${mysteryPart}</td>
                                 <td>${mysteryReveal}</td>
-                                <td>
-                                    <span class="status--process">${mysteryClose}</span>
-                                </td>
+                     
+
                                 <td>${mysteryContractAddress}</td>
     
                             </tr>;
@@ -127,22 +162,32 @@ function getID (){
     return mysteryID.slice(1, mysteryID.length)
 }
 
+
+
 function displayBoxItems(){
 
     var id = getID()
+
 
     var MysteryContract = contractList[0];  
     var ItemContract = contractList[1];  
             MysteryContract.methods.getMysteryBoxByIndex(id).call().then(element => {
                 console.log(JSON.stringify(element))
                 var mysteryID = element.tokenIds;
-                var mysteryContractAddress = element.nftContract
+                localStorage.setItem('price',element.price)
+                $(`#payment-button-amount`).html(element.price)
                 mysteryID.forEach(e =>{
+                    console.log(`e: ${e}`)
                     ItemContract.methods.tokenDataOfOwnerByIndex(MysteryContract._address, e).call().then(re =>{
                         console.log(`re: ${JSON.stringify(re)}`)
+                        if (re.tokenId < imgList.length) {
+                            var imgFile = imgList[re.tokenId];
+                          } else {
+                            var imgFile = imgList[re.tokenId % imgList]
+                          }
                         var tokenIds = e;
                         var tokenURI = re.uri;
-                        var imageSrc= "images/Sample NFTs/King_BIG.png" //TODO needs link to tokenIds
+                        var imageSrc= `images/Sample NFTs/${imgFile}` 
                         var $tablebody = $(`
                         <tr class="spacer"></tr>
                         <tr class="tr-shadow">
@@ -166,11 +211,13 @@ function displayBoxItems(){
 
 function bidding(){
     var id = parseInt(getID())
+    var price = parseInt(localStorage.getItem('price'));
     console.log(`bid: `, id)
+    console.log(`bid: `, price)
     var MysteryContract = contractList[0];
 
     //TODO get price
-    var price = Big(20).times(Big("1000000000000000000")).toString();
+    var price = Big(price).times(Big("1000000000000000000")).toString();
     
     web3.eth.getAccounts().then(account => {        
         var buyer = account[0];

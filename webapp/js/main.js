@@ -99,16 +99,28 @@ whenDocumentReady(function() {
     .catch(function(error){console.error(error);})
 });
 
-
 function getChecked(){
-  var selectedList = [];
-  $('.form-check-input:checkbox:checked').each(checked =>{
-    selectedList.push(checked+1);
-  });
-  console.log(`selectedList: ${selectedList}`)
-  return selectedList
-
+	/* declare an checkbox array */
+	var chkArray = [];
+	
+	/* look for all checkboes that have a class 'chk' attached to it and check if it was checked */
+	$(".form-check-input:checked").each(function() {
+		chkArray.push(parseInt($(this).val()));
+	});
+  
+  return chkArray
 }
+
+// function getChecked(){
+//   var selectedList = [];
+//   $('.form-check-input:checkbox:checked').each(checked =>{
+//     console.log(`checked: `, checked)
+//     selectedList.push(checked+1);
+//   });
+//   console.log(`selectedList: ${selectedList}`)
+//   return selectedList
+
+// }
 
 function getRevealDelta(){
   var delta = parseInt($('#duration').val());
@@ -193,6 +205,9 @@ function mint(){
 
 
 function getBalance(){
+$('.form-check').html('');
+
+
 web3.eth.getAccounts().then(account => {
   var ItemContract = contractList[1]    
   ItemContract.methods.balanceOf(account[0]).call().then(numberOfTokens => {
@@ -201,14 +216,20 @@ web3.eth.getAccounts().then(account => {
     tokenList.forEach(i => {
       ItemContract.methods.tokenDataOfOwnerByIndex(account[0], i).call().then(re =>{
         console.log(`re: ${JSON.stringify(re)}`)
+        if (re.tokenId < imgList.length) {
+          var imgFile = imgList[re.tokenId];
+        } else {
+          var imgFile = imgList[re.tokenId % imgList]
+        }
+
         var $divbody = $(`
             <div class="radio">
             <label for="radio1" class="form-check-label ">
-                <input type="checkbox" id="1" name="radios" value="1" class="form-check-input">
-                <img src="images/Sample NFTs/King_BIG.png" alt="Smiley face" height="80px" width="80px">
+                <input type="checkbox" id="${re.tokenId}" name="radios" value=${re.tokenId} class="form-check-input">
+                <img src="images/Sample NFTs/${imgFile}" alt="Smiley face" height="80px" width="80px">
            </label>
          </div>`)
-        $(`.form-check`).append()
+        $(`.form-check`).append($divbody)
       })
     })
   })

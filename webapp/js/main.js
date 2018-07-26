@@ -136,8 +136,8 @@ function getPrice(){
 function addAuction(){
 
 var selectedList = getChecked();
-if(selectedList.length == 0){
-  alert('No item selected');
+if(selectedList.length <= 1){
+  alert('Need at least 2 items');
   console.log('no item selected');
   return;
 }

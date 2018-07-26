@@ -249,8 +249,8 @@ contract MysteryBoxSale is ERC721Holder {
         address[] participants,
         address seller,
         uint256 price,
-        uint256 revealBlock
-        // bytes32 revealHash;
+        uint256 revealBlock,
+        bytes32 revealHash
     ) {
         require(_index < mysteryBoxesList.length);
 
@@ -262,9 +262,24 @@ contract MysteryBoxSale is ERC721Holder {
         price = mysteryBox.price;
         participants = mysteryBox.participants;
         revealBlock = mysteryBox.revealBlock;
+        revealHash = mysteryBox.revealHash;
         // return getMysteryBox(mysteryBoxesList[_index]);
     }
 
+    function getRevealedTokenId(
+        uint256 _mysteryBoxId,
+        uint256 _participantIndex
+    )
+        public
+        view
+        returns
+    (uint256 tokenId) {
+        MysteryBox memory mysteryBox = mysteryBoxes[_mysteryBoxId];
+        if(mysteryBox.revealHash == 0) {
+            return 0;
+        }
+        return getTokenReceived(_mysteryBoxId, _participantIndex);
+    }
 
     function getMysteryBox(
         uint256 _mysteryBoxId
@@ -279,8 +294,8 @@ contract MysteryBoxSale is ERC721Holder {
         address[] participants,
         address seller,
         uint256 price,
-        uint256 revealBlock
-        // bytes32 revealHash;
+        uint256 revealBlock,
+        bytes32 revealHash
     ) {
         id = _mysteryBoxId;
         MysteryBox memory mysteryBox = mysteryBoxes[_mysteryBoxId];
@@ -290,6 +305,7 @@ contract MysteryBoxSale is ERC721Holder {
         price = mysteryBox.price;
         participants = mysteryBox.participants;
         revealBlock = mysteryBox.revealBlock;
+        revealHash = mysteryBox.revealHash;
         // return getMysteryBox(mysteryBoxesList[_index]);
     }
 

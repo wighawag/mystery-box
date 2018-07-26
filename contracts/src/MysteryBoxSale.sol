@@ -86,18 +86,23 @@ contract MysteryBoxSale is ERC721Holder {
         payable
     {
         require(_isMysteryBoxOnSale(_mysteryBoxId), "MysteryBox not on sale");
+        MysteryBox storage mysteryBox = mysteryBoxes[_mysteryBoxId];
+        require(msg.value >= mysteryBox.price, "Not enough money for the bid");
+        uint256 numParticipants = mysteryBox.participants.length;
+        require(numParticipants < mysteryBox.tokenIds.length, "mystery box has been all purchased");
 
-        require(msg.value >= mysteryBoxes[_mysteryBoxId].price, "Not enough money for the bid");
-        uint256 numParticipants = mysteryBoxes[_mysteryBoxId].participants.length;
-        require(numParticipants < mysteryBoxes[_mysteryBoxId].tokenIds.length, "mystery box has been all purchased");
-
-        mysteryBoxes[_mysteryBoxId].participants.push(recipient);
+        mysteryBox.participants.push(recipient);
         
-        //shuffling as we go by inserting at random //TODO remove push
-        if(numParticipants >= 2) {
-            uint256 swapIndex = uint256(blockhash(block.number-1)) % numParticipants;
-            mysteryBoxes[_mysteryBoxId].participants[numParticipants] = mysteryBoxes[_mysteryBoxId].participants[swapIndex];
-            mysteryBoxes[_mysteryBoxId].participants[swapIndex] = recipient;
+        //shuffling as we go by swapping tokenIds
+        if(mysteryBox.tokenIds.length > 2) {
+            uint256 swap1 = uint256(keccak256(blockhash(block.number-1), 1)) % mysteryBox.tokenIds.length;
+            uint256 swap2 = uint256(keccak256(blockhash(block.number-2), 2)) % mysteryBox.tokenIds.length;
+            if(swap1 == swap2) {
+                swap1 = (swap2 + 1) % mysteryBox.tokenIds.length;
+            }
+            uint256 tmp = mysteryBox.tokenIds[swap1];
+            mysteryBox.tokenIds[swap1] = mysteryBox.tokenIds[swap2];
+            mysteryBox.tokenIds[swap2] = tmp;
         }
 
         emit MysteryBoxBought(_mysteryBoxId, recipient);
@@ -233,8 +238,7 @@ contract MysteryBoxSale is ERC721Holder {
         address[] participants,
         address seller,
         uint256 price,
-        uint256 revealBlock,
-        address[] participants
+        uint256 revealBlock
         // bytes32 revealHash;
     ) {
         require(_index < mysteryBoxesList.length);
@@ -247,7 +251,6 @@ contract MysteryBoxSale is ERC721Holder {
         price = mysteryBox.price;
         participants = mysteryBox.participants;
         revealBlock = mysteryBox.revealBlock;
-        participants = mysteryBox.participants;
         // return getMysteryBox(mysteryBoxesList[_index]);
     }
 

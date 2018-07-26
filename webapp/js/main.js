@@ -163,13 +163,14 @@ web3.eth.getAccounts().then(account => {
   });
   promiEvent.then(function(txReceipt){
     console.log(`txRe: ${JSON.stringify(txReceipt)}`)
+    getBalance()
+
   });
   promiEvent.catch(function(error){
     console.log(`error: ${JSON.stringify(error)}`)
   });
 })
 
-getBalance()
 
 
 }
@@ -197,6 +198,7 @@ function mint(){
     });
     promiEvent.then(function(txReceipt){
       console.log(`txRe: ${JSON.stringify(txReceipt)}`)
+      getBalance()
     });
   });
 

@@ -111,14 +111,12 @@ function getChecked(){
 }
 
 function getRevealDelta(){
-  var delta = 15;
-  // console.log(`selectedList: ${selectedList}`)
+  var delta = parseInt($('#duration').val());
   return delta;
 }
 
 function getPrice(){
-  var price = 20;
-  // console.log(`selectedList: ${selectedList}`)
+  var price = $('#price').val();
   return price;
 }
 
@@ -126,6 +124,11 @@ function getPrice(){
 function addAuction(){
 
 var selectedList = getChecked();
+if(selectedList.length == 0){
+  alert('No item selected');
+  console.log('no item selected');
+  return;
+}
 console.log(selectedList);
 var ItemContract = contractList[1]
 

@@ -136,9 +136,8 @@ function displayAuctions (){
                                 </td>
                                 <td>${mysteryPart}</td>
                                 <td>${mysteryReveal}</td>
-                                <td>
-                                    <span class="status--process">${mysteryClose}</span>
-                                </td>
+                     
+
                                 <td>${mysteryContractAddress}</td>
     
                             </tr>;
@@ -166,12 +165,14 @@ function displayBoxItems(){
 
     var id = getID()
 
+
     var MysteryContract = contractList[0];  
     var ItemContract = contractList[1];  
             MysteryContract.methods.getMysteryBoxByIndex(id).call().then(element => {
                 console.log(JSON.stringify(element))
                 var mysteryID = element.tokenIds;
-                var mysteryContractAddress = element.nftContract
+                var mysteryPrice = element.price
+                $(`#payment-button-amount`).html(mysteryPrice)
                 mysteryID.forEach(e =>{
                     console.log(`e: ${e}`)
                     ItemContract.methods.tokenDataOfOwnerByIndex(MysteryContract._address, e).call().then(re =>{

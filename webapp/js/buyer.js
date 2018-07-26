@@ -71,45 +71,50 @@ function displayAuctions (){
 
     var MysteryContract = contractList[0]  
     var ItemContract = contractList[1]  
-    MysteryContract.methods.numOfMysteryBoxes().call().then(numberOfBox => {
-        console.log(`number: ${numberOfBox}`);
-        var boxList = Array.apply(null, {length: numberOfBox}).map(Number.call, Number)
-        var ctr = 0;
-        boxList.forEach((id, index, array) => {
-            MysteryContract.methods.getMysteryBoxByIndex(id).call().then(element => {
-                // console.log(JSON.stringify(element))
-                var mysteryID = element.tokenIds.length;
-                var mysteryPart = element.participants.length;
-                var mysteryReveal = element.revealBlock
-                var mysteryClose = element.revealBlock-5
-                var imageSrc= "/landing/img/hero-img.png" //TODO needs link to tokenIds
-                var mysteryContractAddress = element.price
-            
-                var $tablebody = $(`
-                        <tr class="spacer"></tr>
-                        <tr class="tr-shadow">
-                            <td>
-                                <label class="au-checkbox">
-                                    <img src="${imageSrc}" style="width:100px;height:100px;" alt="King_BIG" />
-                                </label>
-                            </td>
-                            <td>
-                                <span class="block-email">${mysteryID}</span>
-                            </td>
-                            <td>${mysteryPart}</td>
-                            <td>${mysteryReveal}</td>
-                            <td>
-                                <span class="status--process">${mysteryClose}</span>
-                            </td>
-                            <td>${mysteryContractAddress}</td>
-
-                        </tr>;
-                        `)
-                    $tablebody.on('click',_=>{bidAuction(id)});
-                    $('#auctionTable').find('tbody').append($tablebody);
-                })
-            });        
-        })
+    web3.eth.getBlock("latest").then(function(latestBlock){
+        console.log('latest', latestBlock.number);
+        MysteryContract.methods.numOfMysteryBoxes().call().then(numberOfBox => {
+            console.log(`number: ${numberOfBox}`);
+            var boxList = Array.apply(null, {length: numberOfBox}).map(Number.call, Number)
+            var ctr = 0;
+            boxList.forEach((id, index, array) => {
+                MysteryContract.methods.getMysteryBoxByIndex(id).call().then(element => {
+                    // console.log(JSON.stringify(element))
+                    var mysteryID = element.tokenIds.length;
+                    var mysteryPart = element.participants.length;
+                    var mysteryReveal = element.revealBlock - latestBlock.number;
+                    if(mysteryReveal < 0){mysteryReveal = "revealing..."}
+                    var mysteryClose = element.revealBlock-5
+                    var imageSrc= "/landing/img/hero-img.png" //TODO needs link to tokenIds
+                    var mysteryContractAddress = element.price
+                
+                    var $tablebody = $(`
+                            <tr class="spacer"></tr>
+                            <tr class="tr-shadow">
+                                <td>
+                                    <label class="au-checkbox">
+                                        <img src="${imageSrc}" style="width:100px;height:100px;" alt="King_BIG" />
+                                    </label>
+                                </td>
+                                <td>
+                                    <span class="block-email">${mysteryID}</span>
+                                </td>
+                                <td>${mysteryPart}</td>
+                                <td>${mysteryReveal}</td>
+                                <td>
+                                    <span class="status--process">${mysteryClose}</span>
+                                </td>
+                                <td>${mysteryContractAddress}</td>
+    
+                            </tr>;
+                            `)
+                        $tablebody.on('click',_=>{bidAuction(id)});
+                        $('#auctionTable').find('tbody').append($tablebody);
+                    })
+                });        
+            })
+    })
+    
     }
 
 function bidAuction(mysteryID){
@@ -132,7 +137,6 @@ function displayBoxItems(){
                 console.log(JSON.stringify(element))
                 var mysteryID = element.tokenIds;
                 var mysteryContractAddress = element.nftContract
-                document.getElementById('NFTContract').innerHTML = 'Mystery: ' + mysteryContractAddress;
                 mysteryID.forEach(e =>{
                     ItemContract.methods.tokenDataOfOwnerByIndex(MysteryContract._address, e).call().then(re =>{
                         console.log(`re: ${JSON.stringify(re)}`)

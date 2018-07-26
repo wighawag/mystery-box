@@ -25,7 +25,7 @@ contract MysteryBoxSale is ERC721Holder {
 
     event MysteryBoxCreated(uint256 mysteryBoxId, address seller, uint64 revealBlock);
     event MysteryBoxBought(uint256 mysteryBoxId, address buyer);
-    event MysteryBoxRevealed(uint256 mysteryBoxId);
+    event MysteryBoxRevealed(uint256 mysteryBoxId, uint256 blockNumber, bytes32 revealHash);
     event MysteryBoxClosed(uint256 mysteryBoxId);
     
     function createMysteryBox(
@@ -113,8 +113,8 @@ contract MysteryBoxSale is ERC721Holder {
     function reveal(uint256 _mysteryBoxId) //can be called to anyone , could add reward to ensure it is called in time but the seller should have all interest to do it for its buyer. Without it, he isn't going to get anything
         external 
     {
-        require(mysteryBox.revealHash == 0, "mysterybox already revealed");
         MysteryBox storage mysteryBox = mysteryBoxes[_mysteryBoxId];
+        require(mysteryBox.revealHash == 0, "mysterybox already revealed");
         require(block.number > mysteryBox.revealBlock, "mystery box has not finished");
         // require(block.number < mysteryBox.revealBlock + 255, "mystery box has expired"); // support looping over modulo 255
 
@@ -127,7 +127,7 @@ contract MysteryBoxSale is ERC721Holder {
 
         mysteryBox.revealHash = blockhash(blockNumber);
 
-        emit MysteryBoxRevealed(_mysteryBoxId);
+        emit MysteryBoxRevealed(_mysteryBoxId, blockNumber, mysteryBox.revealHash);
     }
 
     function withdrawToSeller(uint256 _mysteryBoxId) 
@@ -225,6 +225,17 @@ contract MysteryBoxSale is ERC721Holder {
     //     revealBlock = mysteryBox.revealBlock;
     // }
 
+     function isReadyForReveal(
+        uint256 _mysteryBoxId
+    )
+        public
+        view
+        returns
+    (bool ready) {
+        MysteryBox memory mysteryBox = mysteryBoxes[_mysteryBoxId];
+        return mysteryBox.revealHash == 0 && block.number > mysteryBox.revealBlock;
+    }
+
     function getMysteryBoxByIndex(
         uint256 _index
     )
@@ -245,6 +256,34 @@ contract MysteryBoxSale is ERC721Holder {
 
         id = mysteryBoxesList[_index];
         MysteryBox memory mysteryBox = mysteryBoxes[id];
+        nftContract = mysteryBox.nftContract;
+        tokenIds = mysteryBox.tokenIds;
+        seller = mysteryBox.seller;
+        price = mysteryBox.price;
+        participants = mysteryBox.participants;
+        revealBlock = mysteryBox.revealBlock;
+        // return getMysteryBox(mysteryBoxesList[_index]);
+    }
+
+
+    function getMysteryBox(
+        uint256 _mysteryBoxId
+    )
+        public
+        view
+        returns
+    (
+        uint256 id,
+        ERC721 nftContract, //TODO array //TODO suppor tmultiple 721 or support erc1155
+        uint256[] tokenIds,
+        address[] participants,
+        address seller,
+        uint256 price,
+        uint256 revealBlock
+        // bytes32 revealHash;
+    ) {
+        id = _mysteryBoxId;
+        MysteryBox memory mysteryBox = mysteryBoxes[_mysteryBoxId];
         nftContract = mysteryBox.nftContract;
         tokenIds = mysteryBox.tokenIds;
         seller = mysteryBox.seller;

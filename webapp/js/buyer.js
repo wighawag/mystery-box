@@ -143,7 +143,7 @@ function displayAuctions (){
     
                             </tr>;
                             `)
-                        $tablebody.on('click',_=>{bidAuction(id)});
+                        $tablebody.on('click',_=>{bidAuction(element.id)});
                         $('#auctionTable').find('tbody').append($tablebody);
                     })
                 });        
@@ -171,7 +171,7 @@ function displayBoxItems(){
 
     var MysteryContract = contractList[0];  
     var ItemContract = contractList[1];  
-            MysteryContract.methods.getMysteryBoxByIndex(id).call().then(element => {
+            MysteryContract.methods.getMysteryBox(id).call().then(element => {
                 console.log(JSON.stringify(element))
                 var mysteryID = element.tokenIds;
                 localStorage.setItem('price',element.price)
@@ -217,11 +217,11 @@ function bidding(){
     var MysteryContract = contractList[0];
 
     //TODO get price
-    var price = Big(price).times(Big("1000000000000000000")).toString();
+    // var price = Big(price).times(Big("1000000000000000000")).toString();
     
     web3.eth.getAccounts().then(account => {        
         var buyer = account[0];
-        MysteryContract.methods.buy(id+1).send({from: buyer, to: MysteryContract.address, value: price, gas: 4000000});
+        MysteryContract.methods.buy(id+1).send({from: buyer, value: price, gas: 4000000});
     })
 }
 

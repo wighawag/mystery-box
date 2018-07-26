@@ -121,7 +121,7 @@ function displayAuctions (){
                     var mysteryReveal = element.revealBlock - latestBlock.number;
                     var mysteryRevealHash = element.revealHash;
                     console.log(mysteryRevealHash)
-                    if(mysteryReveal < 0){
+                    if(mysteryReveal < 0 && element.participants.length > 0){
                         mysteryReveal = "Revealed"
                         var imageSrc = `images/Sample NFTs/${imgList[element.tokenIds[0]]}` 
                         console.log(`id:${id}`)

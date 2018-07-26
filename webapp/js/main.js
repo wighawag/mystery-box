@@ -88,7 +88,7 @@ web3.eth.getAccounts().then(account => {
   console.log(`accounts: ${account[0]}`)
   var ItemContract = contractList[1]  
   // TODO items in box length
-  var promiEvent = ItemContract.methods.approveAndCreateMysteryBox(MysteryBoxContractAddress, [3, 4], 20, 53).send({from: account[0], gas: 800000});
+  var promiEvent = ItemContract.methods.approveAndCreateMysteryBoxUsingBlockDelta(MysteryBoxContractAddress, [3, 4], 20, 2).send({from: account[0], gas: 800000});
   promiEvent.on("transactionHash", function(txHash){
     console.log(`txHash: ${txHash}`)
   });
@@ -102,18 +102,30 @@ getBalance()
 
 }
 
-function mint(){
+function hashCode (str){
+  var hash = 0;
+  if (str.length == 0) return hash;
+  for (i = 0; i < str.length; i++) {
+      char = str.charCodeAt(i);
+      hash = ((hash<<5)-hash)+char;
+      hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+}
 
-web3.eth.getAccounts().then(account => {
-  var ItemContract = contractList[1]  
-  var promiEvent = ItemContract.methods.mint('random1').send({from: account[0], gas: 400000})
-  promiEvent.on("transactionHash", function(txHash){
-    console.log(`txHash: ${txHash}`)
+function mint(){
+  var hh=Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  var uri=`ipfs:${hh}/`
+  web3.eth.getAccounts().then(account => {
+    var ItemContract = contractList[1]  
+    var promiEvent = ItemContract.methods.mint(uri).send({from: account[0], gas: 400000})
+    promiEvent.on("transactionHash", function(txHash){
+      console.log(`txHash: ${txHash}`)
+    });
+    promiEvent.then(function(txReceipt){
+      console.log(`txRe: ${JSON.stringify(txReceipt)}`)
+    });
   });
-  promiEvent.then(function(txReceipt){
-    console.log(`txRe: ${JSON.stringify(txReceipt)}`)
-  });
-});
 
 }
 

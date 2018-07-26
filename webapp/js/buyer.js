@@ -70,6 +70,7 @@ whenDocumentReady(function() {
 function displayAuctions (){
 
     var MysteryContract = contractList[0]  
+    var ItemContract = contractList[1]  
     MysteryContract.methods.numOfMysteryBoxes().call().then(numberOfBox => {
         console.log(`number: ${numberOfBox}`);
         var boxList = Array.apply(null, {length: numberOfBox}).map(Number.call, Number)
@@ -125,35 +126,39 @@ function displayBoxItems(){
 
     var id = getID()
 
-    var MysteryContract = contractList[0]  
+    var MysteryContract = contractList[0];  
+    var ItemContract = contractList[1];  
             MysteryContract.methods.getMysteryBoxByIndex(id).call().then(element => {
                 console.log(JSON.stringify(element))
                 var mysteryID = element.tokenIds;
                 var mysteryContractAddress = element.nftContract
                 document.getElementById('NFTContract').innerHTML = 'Mystery: ' + mysteryContractAddress;
                 mysteryID.forEach(e =>{
-                    var tokenIds = e;
-                    var tokenURI = 'TOKEN URI'
-                    var imageSrc= "images/Sample NFTs/King_BIG.png" //TODO needs link to tokenIds
-                    var $tablebody = $(`
-                    <tr class="spacer"></tr>
-                    <tr class="tr-shadow">
-                    <td>
-                    <label class="au-checkbox">
-                    <img src="${imageSrc}" style="width:100px;height:100px;" alt="King_BIG" />
-                    </label>
-                    </td>
-                    <td>
-                    <span class="block-email">${tokenIds}</span>
-                    </td>
-                    <td>${tokenURI}</td>
-                    </tr>;
-                    `)
-                    $tablebody.on('click',_=>{bidAuction(id)});
-                    $('#detailTable').find('tbody').append($tablebody);
+                    ItemContract.methods.tokenDataOfOwnerByIndex(MysteryContract._address, e).call().then(re =>{
+                        console.log(`re: ${JSON.stringify(re)}`)
+                        var tokenIds = e;
+                        var tokenURI = re.uri;
+                        var imageSrc= "images/Sample NFTs/King_BIG.png" //TODO needs link to tokenIds
+                        var $tablebody = $(`
+                        <tr class="spacer"></tr>
+                        <tr class="tr-shadow">
+                        <td>
+                        <label class="au-checkbox">
+                        <img src="${imageSrc}" style="width:100px;height:100px;" alt="King_BIG" />
+                        </label>
+                        </td>
+                        <td>
+                        <span class="block-email">${tokenIds}</span>
+                        </td>
+                        <td>${tokenURI}</td>
+                        </tr>;
+                        `)
+                        $tablebody.on('click',_=>{bidAuction(id)});
+                        $('#detailTable').find('tbody').append($tablebody);
+                    })
+                    })
                 })
-            })
-    }
+            }
 
 function bidding(){
     var id = parseInt(getID())

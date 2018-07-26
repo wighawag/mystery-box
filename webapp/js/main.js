@@ -88,12 +88,15 @@ web3.eth.getAccounts().then(account => {
   console.log(`accounts: ${account[0]}`)
   var ItemContract = contractList[1]  
   // TODO items in box length
-  var promiEvent = ItemContract.methods.approveAndCreateMysteryBoxUsingBlockDelta(MysteryBoxContractAddress, [3, 4], 20, 2).send({from: account[0], gas: 800000});
+  var promiEvent = ItemContract.methods.approveAndCreateMysteryBoxUsingBlockDelta(MysteryBoxContractAddress, [1,2], 20, 15).send({from: account[0], gas: 400000});
   promiEvent.on("transactionHash", function(txHash){
     console.log(`txHash: ${txHash}`)
   });
   promiEvent.then(function(txReceipt){
     console.log(`txRe: ${JSON.stringify(txReceipt)}`)
+  });
+  promiEvent.catch(function(error){
+    console.log(`error: ${JSON.stringify(error)}`)
   });
 })
 

@@ -119,7 +119,9 @@ function displayAuctions (){
                     var mysteryID = element.tokenIds.length;
                     var mysteryPart = element.participants.length;
                     var mysteryReveal = element.revealBlock - latestBlock.number;
-                    if(mysteryReveal < 0){mysteryReveal = "revealing..."}
+                    if(mysteryReveal < 0){
+                        mysteryReveal = "revealing..."
+                    }
                     var mysteryClose = element.revealBlock-5
                     var imageSrc= "/landing/img/hero-img.png" //TODO needs link to tokenIds
                     var mysteryContractAddress = element.price
@@ -221,7 +223,19 @@ function bidding(){
     
     web3.eth.getAccounts().then(account => {        
         var buyer = account[0];
-        MysteryContract.methods.buy(id).send({from: buyer, value: price, gas: 4000000});
+        var promiEvent = MysteryContract.methods.buy(id).send({from: buyer, value: price, gas: 4000000});
+        promiEvent.on("transactionHash", function(txHash){
+            console.log(`txHash: ${txHash}`)
+          });
+          promiEvent.then(function(txReceipt){
+            console.log(`txRe: ${JSON.stringify(txReceipt)}`)
+            alert('Successfully purchased')
+            window.location.href = `buying.html`
+
+          });
+          promiEvent.catch(function(error){
+            console.log(`error: ${JSON.stringify(error)}`)
+          });
     })
 }
 

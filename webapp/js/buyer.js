@@ -34,7 +34,8 @@ const imgList=[ 'AirBubble.png',
 'Sheep.png',
 'ShrekKnight.png',
 'Unicorn.png',
-'Zombie.png' ]
+'Zombie.png' ];
+const mysteryPrice = 0
 
 function whenDocumentReady(fn) {
   if (document.readyState == "complete") {
@@ -161,6 +162,8 @@ function getID (){
     return mysteryID.slice(1, mysteryID.length)
 }
 
+
+
 function displayBoxItems(){
 
     var id = getID()
@@ -171,8 +174,8 @@ function displayBoxItems(){
             MysteryContract.methods.getMysteryBoxByIndex(id).call().then(element => {
                 console.log(JSON.stringify(element))
                 var mysteryID = element.tokenIds;
-                var mysteryPrice = element.price
-                $(`#payment-button-amount`).html(mysteryPrice)
+                localStorage.setItem('price',element.price)
+                $(`#payment-button-amount`).html(element.price)
                 mysteryID.forEach(e =>{
                     console.log(`e: ${e}`)
                     ItemContract.methods.tokenDataOfOwnerByIndex(MysteryContract._address, e).call().then(re =>{
@@ -208,11 +211,13 @@ function displayBoxItems(){
 
 function bidding(){
     var id = parseInt(getID())
+    var price = parseInt(localStorage.getItem('price'));
     console.log(`bid: `, id)
+    console.log(`bid: `, price)
     var MysteryContract = contractList[0];
 
     //TODO get price
-    var price = Big(20).times(Big("1000000000000000000")).toString();
+    var price = Big(price).times(Big("1000000000000000000")).toString();
     
     web3.eth.getAccounts().then(account => {        
         var buyer = account[0];

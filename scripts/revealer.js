@@ -48,17 +48,19 @@ function connectedToNetwork(accounts) {
     Contract.methods.numOfMysteryBoxes().call().then((numBoxes) => {
       for(let i = 0; i < numBoxes; i++) {
         Contract.methods.getMysteryBoxByIndex(i).call().then((mysteryBox) => {
-          Contract.methods.reveal(mysteryBox.id).send({from:accounts[0], gas:4000000}).then((receipt) => {
-            console.log('RECEIPT');
-            console.log(JSON.stringify(receipt));
-            // console.log(JSON.stringify(receipt.events[0].returnValues));
+          Contract.methods.isReadyForReveal(mysteryBox.id).call().then((ready) => {
+            if(ready){
+              Contract.methods.reveal(mysteryBox.id).send({from:accounts[0], gas:4000000}).then((receipt) => {
+                console.log('RECEIPT');
+                console.log(JSON.stringify(receipt));
+                // console.log(JSON.stringify(receipt.events[0].returnValues));
+              });
+            }else{
+              console.log('not ready to reveal', mysteryBox.id);
+            }
           });
         });
-        // Contract.methods.isReadyForReveal().call().then((ready) => {
-        //   if(ready){
-        //     Contract.methods.reveal().send().then((ready) => {
-        //   }
-        // });
+        
       }
     });
   }, 5000);

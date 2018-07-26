@@ -125,9 +125,9 @@ contract MysteryBoxSale is ERC721Holder {
             blockNumber = blockNumber - ((fartherBlock - mysteryBox.revealBlock) % 255);
         }
 
-        mysteryBox.revealHash = blockhash(blockNumber);
+        mysteryBoxes[_mysteryBoxId].revealHash = blockhash(blockNumber);
 
-        emit MysteryBoxRevealed(_mysteryBoxId, blockNumber, mysteryBox.revealHash);
+        emit MysteryBoxRevealed(_mysteryBoxId, blockNumber, mysteryBoxes[_mysteryBoxId].revealHash);
     }
 
     function withdrawToSeller(uint256 _mysteryBoxId) 

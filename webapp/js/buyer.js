@@ -60,10 +60,12 @@ whenDocumentReady(function() {
     .then(function(contract){
       console.log("contract initialised My", contract[0]._address);
       console.log("contract initialised It", contract[1]._address)
-      displayAuctions()
+      displayAuctions();
+      displayBoxItems();
   })
     .catch(function(error){console.error(error);})
 });
+
 
 function displayAuctions (){
 
@@ -74,14 +76,13 @@ function displayAuctions (){
         var ctr = 0;
         boxList.forEach((id, index, array) => {
             MysteryContract.methods.getMysteryBoxByIndex(id).call().then(element => {
-                // TODO move to box_details
-                // var mysteryName = element.nftContract
-                // document.getElementById('NFTContract').innerHTML = 'Mystery: ' + mysteryName;
-                var mysteryID = array.length;
-                var mysteryDescription = element.tokenIds;
+                // console.log(JSON.stringify(element))
+                var mysteryID = element.tokenIds.length;
+                var mysteryPart = element.participants.length;
                 var mysteryReveal = element.revealBlock
                 var mysteryClose = element.revealBlock-5
-                var imageSrc= "images/Sample NFTs/King_BIG.png" //TODO needs link to tokenIds
+                var imageSrc= "/landing/img/hero-img.png" //TODO needs link to tokenIds
+                var mysteryContractAddress = element.nftContract
             
                 var $tablebody = $(`
                         <tr class="spacer"></tr>
@@ -94,14 +95,16 @@ function displayAuctions (){
                             <td>
                                 <span class="block-email">${mysteryID}</span>
                             </td>
-                            <td class="desc">${mysteryDescription}</td>
+                            <td>${mysteryPart}</td>
                             <td>${mysteryReveal}</td>
                             <td>
                                 <span class="status--process">${mysteryClose}</span>
                             </td>
+                            <td>${mysteryContractAddress}</td>
+
                         </tr>;
                         `)
-                    $tablebody.on('click',_=>{bidAuction(mysteryID)});
+                    $tablebody.on('click',_=>{bidAuction(id)});
                     $('#auctionTable').find('tbody').append($tablebody);
                 })
             });        
@@ -109,10 +112,63 @@ function displayAuctions (){
     }
 
 function bidAuction(mysteryID){
-    console.log("here?")
-    window.location.href = `box_details.html#${mysteryID}`    
-
+    window.location.href = `box_details.html#${mysteryID}`
 }
+
+function getID (){
+    var mysteryID = window.location.hash
+    console.log(`${mysteryID.slice(1, mysteryID.length)}`)
+    return mysteryID.slice(1, mysteryID.length)
+}
+
+function displayBoxItems(){
+
+    var id = getID()
+
+    var MysteryContract = contractList[0]  
+            MysteryContract.methods.getMysteryBoxByIndex(id).call().then(element => {
+                console.log(JSON.stringify(element))
+                var mysteryID = element.tokenIds;
+                var mysteryContractAddress = element.nftContract
+                document.getElementById('NFTContract').innerHTML = 'Mystery: ' + mysteryContractAddress;
+                mysteryID.forEach(e =>{
+                    var tokenIds = e;
+                    var tokenURI = 'TOKEN URI'
+                    var imageSrc= "images/Sample NFTs/King_BIG.png" //TODO needs link to tokenIds
+                    var $tablebody = $(`
+                    <tr class="spacer"></tr>
+                    <tr class="tr-shadow">
+                    <td>
+                    <label class="au-checkbox">
+                    <img src="${imageSrc}" style="width:100px;height:100px;" alt="King_BIG" />
+                    </label>
+                    </td>
+                    <td>
+                    <span class="block-email">${tokenIds}</span>
+                    </td>
+                    <td>${tokenURI}</td>
+                    </tr>;
+                    `)
+                    $tablebody.on('click',_=>{bidAuction(id)});
+                    $('#detailTable').find('tbody').append($tablebody);
+                })
+            })
+    }
+
+function bidding(){
+    var id = parseInt(getID())
+    console.log(`bid: `, id)
+    var MysteryContract = contractList[0];
+    var bid=$('#bidPrice').val()
+    console.log(`bid: ${bid}`)
+
+    web3.eth.getAccounts().then(account => {        
+        var buyer = account[0];
+        MysteryContract.methods.buy(id+1).send({from: buyer, to: MysteryContract.address, value: 20, gas: 4000000});
+    })
+}
+
+
 
 
 

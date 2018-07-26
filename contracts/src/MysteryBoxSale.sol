@@ -181,6 +181,7 @@ contract MysteryBoxSale is Pausable, ERC721Holder {
     (
         ERC721 nftContract, //TODO array //TODO suppor tmultiple 721 or support erc1155
         uint256[] tokenIds,
+        address[] participants,
         address seller,
         uint256 price,
         uint256 revealBlock
@@ -192,6 +193,7 @@ contract MysteryBoxSale is Pausable, ERC721Holder {
         tokenIds = mysteryBox.tokenIds;
         seller = mysteryBox.seller;
         price = mysteryBox.price;
+        participants = mysteryBox.participants;
         revealBlock = mysteryBox.revealBlock;
 
         // return getMysteryBox(mysteryBoxesList[_index]);

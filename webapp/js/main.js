@@ -88,7 +88,7 @@ web3.eth.getAccounts().then(account => {
   console.log(`accounts: ${account[0]}`)
   var ItemContract = contractList[1]  
   // TODO items in box length
-  var promiEvent = ItemContract.methods.approveAndCreateMysteryBox(MysteryBoxContractAddress, [4, 6], 200, 43).send({from: account[0], gas: 800000});
+  var promiEvent = ItemContract.methods.approveAndCreateMysteryBox(MysteryBoxContractAddress, [3, 4], 20, 53).send({from: account[0], gas: 800000});
   promiEvent.on("transactionHash", function(txHash){
     console.log(`txHash: ${txHash}`)
   });
@@ -97,7 +97,7 @@ web3.eth.getAccounts().then(account => {
   });
 })
 
-
+getBalance()
 
 
 }

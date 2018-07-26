@@ -164,26 +164,26 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-md-12">
-                            <h3 class="title-5 m-b-35">All Mysterious Boxes</h3>
+                            <h3 class="title-5 m-b-35" id='NFTContract'>Mystery Box: </h3>
                             <div class="table-data__tool">
                                 <div class="table-data__tool-left">
                                     <div class="rs-select2--light rs-select2--md">
-                                        <input type="text" class="form-control" name="property">
+                                        <input type="text" class="form-control" name="property" id="bidPrice">
                                     </div>
-                                    <button class="au-btn-filter">
-                                        <i class="zmdi zmdi-filter-list"></i>Bid</button>
+                                    <button  onclick='bidding()' class="au-btn-filter">
+                                            <span id="payment-button-amount">Bid</span>
+                                        </button>
                                 </div>
                             </div>
                             <div class="table-responsive table-responsive-data2">
-                                <table id=auctionTable class="table table-data2">
+                                <table id=detailTable class="table table-data2">
                                     <thead>
                                         <tr>
                                             <th>
                                                 <label class="au-checkbox">
                                                 </label>
                                             </th>
-                                            <th>Mystery</th>
-                                            <th>Token ID</th>
+                                            <th>NFT Token ID</th>
                                             <th>Token URI</th>
                                         </tr>
                                     </thead>
@@ -257,9 +257,8 @@
     <!-- Main JS-->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="js/web3.min.js"></script>
-    <script src="js/main.js"></script>
     <script src="js/main-web.js"></script>
-    <script src="js/box_details.js"></script>
+    <script src="js/buyer.js"></script>
 
 </body>
 
